@@ -1,5 +1,19 @@
 package org.magnum.mobilecloud.video.repository;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
+import javax.persistence.CollectionTable;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+
 import com.google.common.base.Objects;
 
 /**
@@ -16,17 +30,23 @@ import com.google.common.base.Objects;
  * 
  * @author mitchell
  */
+@Entity
 public class Video {
-
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
 	private long id;
 
 	private String name;
 	private String url;
 	private long duration;
 	private long likes;
+
+	@ElementCollection
+	@CollectionTable(name = "video_likes", joinColumns = @JoinColumn(name = "id"))
+	private Set<Like> unameLikes = new HashSet<>();
 	
-	public Video() {
-	}
+	public Video() {}
 
 	public Video(String name, String url, long duration, long likes) {
 		super();
@@ -69,12 +89,22 @@ public class Video {
 	}
 
 	public long getLikes() {
-		return likes;
+		return unameLikes.size();
 	}
 	
 	public void setLikes(long likes) {
 		this.likes = likes;
 	}
+	
+	public boolean like(Like like){
+		return unameLikes.add(like);
+	}
+	
+	public boolean unlike(Like like){
+		return unameLikes.remove(like);
+	}
+	
+	
 	
 	/**
 	 * Two Videos will generate the same hashcode if they have exactly the same
@@ -105,4 +135,14 @@ public class Video {
 		}
 	}
 
+	public Collection<? extends String> getUnameLikes() {
+		List<String> lAnswer = new LinkedList<>();
+		for (Like l : this.unameLikes){
+			lAnswer.add(l.getUsername());
+		}
+		return lAnswer;
+	}
+
+
+	
 }
